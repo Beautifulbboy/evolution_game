@@ -118,17 +118,21 @@ function render(data) {
         buffArea.innerHTML += `<span class="buff-tag" style="background:${b.color}" data-tooltip="${tooltip.trim()}">${b.name} (${Math.ceil(b.remaining)}s)</span>`;
     });
 
-    // 4. 永久基因
+    // 4. 永久基因渲染 (修复点：显示等级，计算叠加后的详情)
     const permArea = document.getElementById('perm-area');
     if (p.perms.length > 0) {
         permArea.innerHTML = '';
         p.perms.forEach(b => {
             let tooltip = '';
+            let lv = b.level || 1;
             for(const [k, v] of Object.entries(b.effect)) {
                 let sign = v > 0 ? '+' : '';
-                tooltip += `${TRANS[k]||k} ${sign}${v} `;
+                // 计算当前等级的总加成
+                let totalVal = (v * lv).toFixed(1);
+                // 显示格式: 攻击力 +1.0 (基础+0.5)
+                tooltip += `${TRANS[k]||k} ${sign}${totalVal} `;
             }
-            permArea.innerHTML += `<span class="buff-tag" style="background:#222; border:1px solid ${b.color}; color:${b.color};" data-tooltip="${tooltip.trim()}">${b.name}</span>`;
+            permArea.innerHTML += `<span class="buff-tag" style="background:#222; border:1px solid ${b.color}; color:${b.color};" data-tooltip="${tooltip.trim()}">${b.name} <span style="font-size:9px; color:#fff;">Lv.${lv}</span></span>`;
         });
     } else {
         permArea.innerHTML = '<span style="color:#666; font-size:12px;">(暂无)</span>';
@@ -142,7 +146,7 @@ function render(data) {
         document.getElementById('bar-'+key).style.width = Math.min(100, (val/cap)*100) + '%';
     });
 
-    // --- 6. 标签页内容 ---
+    // 6. 标签页内容
     
     // Tab 1: 进化
     const craftGrid = document.getElementById('craft-grid');
@@ -171,7 +175,7 @@ function render(data) {
          </div>`;
     }
 
-    // Tab 2: 自动化 (这里做了修改，显示需求)
+    // Tab 2: 自动化
     const autoList = document.getElementById('auto-list');
     autoList.innerHTML = '';
     for(const [k, info] of Object.entries(autoInfo)) {
@@ -202,7 +206,7 @@ function render(data) {
         cardsDiv.innerHTML = '';
         p.shop.options.forEach((opt, idx) => {
             let tip = '';
-            for(const [k, v] of Object.entries(opt.effect)) tip += `${TRANS[k]||k} +${v}\n`;
+            for(const [k, v] of Object.entries(opt.effect)) tip += `${TRANS[k]||k} +${v} `; // 使用空格而不是 \n
             
             cardsDiv.innerHTML += `
             <div class="shop-card" onclick="selectShop(${idx})">

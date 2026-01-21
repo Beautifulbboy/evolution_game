@@ -4,7 +4,7 @@ import copy
 import random
 
 app = Flask(__name__)
-app.secret_key = 'evolution_v4_7_fixes_key'
+app.secret_key = 'evolution_v4_8_stacking_key'
 
 @app.route('/favicon.ico')
 def favicon(): return '', 204
@@ -19,15 +19,25 @@ TRANS = {
     'gather_speed': '采集/攻击力', 'hp_regen': '生命回复'
 }
 
-# --- 变异池 ---
+# --- 变异池 (加入了减益) ---
 MUTATION_POOL = [
+    # --- 临时增益 ---
     {'id': 't_atk', 'name': '猎手本能', 'type': 'temp', 'duration': 30, 'effect': {'gather_speed': 5.0}, 'desc': '攻击力暴涨', 'color': '#76ff03', 'weight': 20},
     {'id': 't_def', 'name': '甲壳硬化', 'type': 'temp', 'duration': 40, 'effect': {'defense': 3.0}, 'desc': '防御力大幅提升', 'color': '#76ff03', 'weight': 20},
     {'id': 't_reg', 'name': '超速再生', 'type': 'temp', 'duration': 20, 'effect': {'hp_regen': 10.0}, 'desc': '生命极速回复', 'color': '#76ff03', 'weight': 15},
+    
+    # --- 临时减益 (Debuff) ---
+    {'id': 't_weak', 'name': '基因崩溃', 'type': 'temp', 'duration': 30, 'effect': {'defense': -3.0, 'max_hp': -20}, 'desc': '虚弱状态', 'color': '#ff5252', 'weight': 10},
+    {'id': 't_slow', 'name': '代谢迟缓', 'type': 'temp', 'duration': 30, 'effect': {'gather_speed': -1.0}, 'desc': '行动变慢', 'color': '#ff5252', 'weight': 10},
+
+    # --- 永久特性 (Perm) ---
     {'id': 'p_cap', 'name': '空间折叠', 'type': 'perm', 'effect': {'storage_cap': 100}, 'desc': '永久容量 +100', 'color': '#00e5ff', 'weight': 10},
     {'id': 'p_atk', 'name': '利爪进化', 'type': 'perm', 'effect': {'gather_speed': 0.5}, 'desc': '永久攻击 +0.5', 'color': '#00e5ff', 'weight': 10},
     {'id': 'p_def', 'name': '石墨烯膜', 'type': 'perm', 'effect': {'defense': 0.3}, 'desc': '永久防御 +0.3', 'color': '#00e5ff', 'weight': 10},
-    {'id': 'p_res', 'name': '极端适应', 'type': 'perm', 'effect': {'heat_res': 1.0}, 'desc': '永久耐热 +1.0', 'color': '#00e5ff', 'weight': 10}
+    {'id': 'p_res', 'name': '极端适应', 'type': 'perm', 'effect': {'heat_res': 1.0}, 'desc': '永久耐热 +1.0', 'color': '#00e5ff', 'weight': 10},
+    
+    # --- 永久减益 (诅咒) ---
+    {'id': 'p_curse', 'name': '玻璃大炮', 'type': 'perm', 'effect': {'gather_speed': 2.0, 'max_hp': -50}, 'desc': '攻击大增，血量大减', 'color': '#d500f9', 'weight': 5}
 ]
 
 # --- 游戏配置 ---
@@ -71,7 +81,7 @@ INITIAL_STATE = {
     'inventory': {'amino_acid': 0, 'lipid': 0, 'sulfur': 0, 'minerals': 0, 'ancient_gene': 0},
     'upgrades': {},
     'automations': {'cilia': 0, 'lipid_synth': 0, 'sulfur_pump': 0},
-    'perms': [], 
+    'perms': [], # 存储结构优化：[{'id':..., 'level':1, ...}]
     'active_buffs': [],
     'mutation_bar': 0.0,
     'current_zone': 'safe_zone',
@@ -90,16 +100,40 @@ def get_state():
     if 'shop' not in p: p['shop'] = {'open': False, 'options': []}
     return p
 
+# --- 核心更新 1：计算属性时考虑等级 ---
 def get_effective_stats(player):
     eff = copy.deepcopy(player['stats'])
+    
+    # 叠加永久突变 (Base * Level)
     for perm in player['perms']:
-        for k, v in perm['effect'].items(): eff[k] = eff.get(k, 0) + v
+        lv = perm.get('level', 1)
+        for k, v in perm['effect'].items(): 
+            eff[k] = eff.get(k, 0) + (v * lv)
+            
+    # 叠加临时Buff (临时Buff通常不叠加等级，只叠加时间或共存，这里保持简单共存)
     for buff in player['active_buffs']:
-        for k, v in buff['effect'].items(): eff[k] = eff.get(k, 0) + v
+        for k, v in buff['effect'].items(): 
+            eff[k] = eff.get(k, 0) + v
+            
     if player['flags'].get('boss_defeated'):
         eff['storage_cap'] += GAME_CONFIG['boss']['bonus_cap']
     eff['gather_speed'] = max(0.1, eff['gather_speed'])
     return eff
+
+# --- 核心更新 2：获得永久突变时处理堆叠 ---
+def apply_permanent_gene(player, gene_template):
+    # 检查是否已拥有
+    existing = next((p for p in player['perms'] if p['id'] == gene_template['id']), None)
+    
+    if existing:
+        existing['level'] = existing.get('level', 1) + 1
+        return f"基因强化: {gene_template['name']} -> Lv.{existing['level']}"
+    else:
+        # 新获得，深拷贝并初始化 level
+        new_gene = copy.deepcopy(gene_template)
+        new_gene['level'] = 1
+        player['perms'].append(new_gene)
+        return f"获得新基因: {gene_template['name']}"
 
 def trigger_mutation(player):
     total_weight = sum(m['weight'] for m in MUTATION_POOL)
@@ -111,9 +145,10 @@ def trigger_mutation(player):
             chosen = m
             break
         upto += m['weight']
+    
     if chosen['type'] == 'perm':
-        for k, v in chosen['effect'].items(): player['stats'][k] = player['stats'].get(k, 0) + v
-        log_msg = f"🧬 突变! 获得永久特性: [{chosen['name']}]"
+        msg = apply_permanent_gene(player, chosen)
+        log_msg = f"🧬 {msg}"
     else:
         new_buff = {
             'name': chosen['name'], 'effect': chosen['effect'],
@@ -144,7 +179,6 @@ def get_next_level_info(player):
         }
     return dynamic_recipes
 
-# --- 修复点：在这里拼接字符串，前端直接显示 ---
 def get_auto_info(player):
     info = {}
     for key, conf in GAME_CONFIG['automations'].items():
@@ -152,7 +186,6 @@ def get_auto_info(player):
         scale = conf['cost_scale']
         cost = {k: int(v * (scale ** lv)) for k, v in conf['cost'].items()}
         
-        # 预先生成前端需要的字符串
         p_str = ", ".join([f"{TRANS.get(k,k)}+{v}" for k,v in conf['produce'].items()])
         c_str = ", ".join([f"{TRANS.get(k,k)}-{v}" for k,v in conf['consume'].items()])
         
@@ -357,13 +390,15 @@ def shop_select(idx):
     p = get_state()
     if not p['shop']['open'] or idx < 0 or idx >= len(p['shop']['options']): return make_resp(p)
     chosen = p['shop']['options'][idx]
+    
     if chosen['type'] == 'perm':
-        p['perms'].append(chosen)
-        msg = f"植入永久基因: {chosen['name']}"
+        # 核心更新 3：使用新逻辑处理永久基因堆叠
+        msg = apply_permanent_gene(p, chosen)
     else:
         chosen['end_time'] = time.time() + chosen['duration']
         p['active_buffs'].append(chosen)
         msg = f"应用临时状态: {chosen['name']}"
+        
     p['shop']['open'] = False
     p['shop']['options'] = []
     session.modified = True
