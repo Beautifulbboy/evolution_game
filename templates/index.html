@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
-    <title>进化 v4.1 (重构版)</title>
+    <title>进化 v4.6 - 基因工程</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -33,6 +33,13 @@
             <div id="buff-area" style="min-height:20px;"></div>
         </div>
 
+        <div class="panel" style="padding: 10px;">
+            <h3 style="color:#00e5ff; border-color:#00e5ff; margin-bottom:5px;">♾️ 永久基因</h3>
+            <div id="perm-area" style="min-height:20px; display:flex; flex-wrap:wrap;">
+                <span style="color:#666; font-size:12px;">(暂无)</span>
+            </div>
+        </div>
+
         <div class="panel" style="flex: 1; overflow-y:auto;">
             <h3>📦 物质仓库 <span id="cap-display" style="float:right; font-size:12px; color:#aaa">Cap: 100</span></h3>
             <div id="resources-container"></div>
@@ -40,12 +47,7 @@
         
         <div class="panel">
             <h3>🌏 区域跃迁</h3>
-            {% for key, item in zones.items() %}
-            <button class="travel-btn" onclick="travel('{{key}}')">
-                <div style="font-weight:bold; font-size:13px;">{{ item.info.name }}</div>
-                <small style="color:#90a4ae;" id="zone-desc-{{key}}">{{ item.res_str }}</small>
-            </button>
-            {% endfor %}
+            <div id="zone-container"></div>
         </div>
     </div>
 
@@ -69,14 +71,37 @@
                 <div id="boss-text" class="bar-text" style="font-size:14px;"></div>
             </div>
             <div style="margin-bottom:20px; font-size:13px; color:#aaa;">Boss正在对你造成持续物理伤害...</div>
-            
             <button class="combat-btn btn-atk" onclick="combatAction('attack')">⚔️ 攻击 (dmg: <span id="atk-dmg">0</span>)</button>
             <button class="combat-btn btn-esc" onclick="combatAction('escape')">💨 逃离</button>
         </div>
 
-        <div class="panel" id="evolution-interface" style="flex: 1; display:flex; flex-direction:column;">
-            <h3>⚗️ 进化序列</h3>
-            <div id="craft-grid" class="craft-grid"></div>
+        <div class="panel" id="main-interface" style="flex: 1; display:flex; flex-direction:column;">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('evo', this)">⚗️ 进化</button>
+                <button class="tab-btn" onclick="switchTab('auto', this)">🏭 细胞器</button>
+                <button class="tab-btn" onclick="switchTab('shop', this)">🧬 基因室</button>
+            </div>
+
+            <div id="tab-evo" class="tab-content active">
+                <div id="craft-grid" class="craft-grid"></div>
+            </div>
+
+            <div id="tab-auto" class="tab-content">
+                <div id="auto-list"></div>
+            </div>
+
+            <div id="tab-shop" class="tab-content" style="text-align:center; padding-top:20px;">
+                <div id="shop-init">
+                    <p style="color:#aaa;">花费远古基因，重组 DNA 序列以获取强大特性。</p>
+                    <button onclick="openShop()" style="background:#311b92; color:#e040fb; padding:10px 20px; border:1px solid #e040fb; font-size:14px; cursor:pointer;">
+                        启动基因编辑器 (需 {{ config.shop_cost }} 远古基因)
+                    </button>
+                </div>
+                <div id="shop-options" style="display:none;">
+                    <h3 style="color:#00e5ff;">请选择突变方向:</h3>
+                    <div id="shop-cards" class="shop-card-container"></div>
+                </div>
+            </div>
         </div>
     </div>
 

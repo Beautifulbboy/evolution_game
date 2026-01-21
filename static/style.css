@@ -12,8 +12,9 @@ h3 { margin: 0 0 10px 0; color: #eee; border-bottom: 1px solid #444; padding-bot
 .bar-text { position: absolute; width: 100%; text-align: center; top: 0; line-height: 18px; font-size: 11px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px #000; pointer-events: none;}
 .dna-bar { background: repeating-linear-gradient(45deg, #7b1fa2, #7b1fa2 10px, #4a148c 10px, #4a148c 20px); }
 
+/* --- 悬停 Tooltip --- */
 .buff-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; margin-bottom: 5px; color: #000; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.5); cursor: help; position: relative; }
-.buff-tag::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #222; color: #fff; border: 1px solid #555; padding: 6px 10px; border-radius: 4px; font-size: 12px; white-space: pre; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); pointer-events: none; opacity: 0; visibility: hidden; transition: 0.2s; min-width: 100px; text-align: center;}
+.buff-tag::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #222; color: #fff; border: 1px solid #555; padding: 6px 10px; border-radius: 4px; font-size: 12px; white-space: pre; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); pointer-events: none; opacity: 0; visibility: hidden; transition: 0.2s; min-width: 120px; text-align: center;}
 .buff-tag:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-5px); }
 
 button { cursor: pointer; border: none; border-radius: 4px; transition: 0.2s; font-family: inherit;}
@@ -23,9 +24,9 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .gather-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 16px; padding: 12px 24px; margin: 8px; border-radius: 30px; }
 .gather-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
 
+/* --- 战斗界面 --- */
 .combat-mode { border: 2px solid #b71c1c; animation: pulse 2s infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 10px #b71c1c; } 50% { box-shadow: 0 0 20px #f44336; } 100% { box-shadow: 0 0 10px #b71c1c; } }
-
 .boss-hp-bar { height: 30px; background: #333; margin: 20px 0; border: 1px solid #fff; position: relative; border-radius: 4px; overflow: hidden; }
 .boss-fill { height: 100%; background: #d50000; width: 100%; transition: width 0.2s; }
 .combat-btn { width: 100%; padding: 15px; font-size: 18px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid #444; color: white;}
@@ -33,6 +34,22 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-esc { background: #455a64; } .btn-esc:hover { background: #607d8b; }
 
 .res-rare { color: #e040fb !important; font-weight: bold; }
+
+/* --- 标签页系统 --- */
+.tabs { display: flex; border-bottom: 1px solid #444; margin-bottom: 10px; }
+.tab-btn { flex: 1; background: transparent; color: #888; padding: 10px; font-weight: bold; border-radius: 8px 8px 0 0; }
+.tab-btn:hover { background: #2a2a2a; color: #ccc; }
+.tab-btn.active { background: #333; color: #fff; border-bottom: 2px solid #00e5ff; }
+.tab-content { display: none; height: 100%; overflow-y: auto; }
+.tab-content.active { display: block; }
+
+/* --- 自动化 & 商店 样式 --- */
+.auto-row { display: flex; justify-content: space-between; align-items: center; background: #262626; padding: 8px; margin-bottom: 8px; border-radius: 4px; border-left: 3px solid #ff9800; }
+.auto-btn { background: #e65100; color: white; padding: 4px 10px; font-size: 12px; }
+
+.shop-card-container { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
+.shop-card { width: 130px; background: #222; border: 1px solid #00e5ff; padding: 10px; border-radius: 6px; cursor: pointer; text-align: center; transition: 0.2s; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between; }
+.shop-card:hover { transform: translateY(-5px); box-shadow: 0 0 10px #00e5ff; background: #2a2a2a; }
 
 #current-env { padding: 20px; border-radius: 6px; text-align: center; color: #fff; transition: background 0.5s; min-height: 140px; display: flex; flex-direction: column; justify-content: center;}
 .craft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; overflow-y: auto; padding-right: 5px;}
