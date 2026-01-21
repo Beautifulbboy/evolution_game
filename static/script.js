@@ -80,7 +80,6 @@ function render(data) {
         const combatArea = document.getElementById('combat-area');
         const zoneCont = document.getElementById('zone-container');
         
-        // 区域逻辑
         if (p.current_zone === 'abyss') {
             if (p.flags.boss_defeated) {
                 gatherArea.style.display = 'block';
@@ -94,7 +93,6 @@ function render(data) {
             combatArea.style.display = 'none';
         }
         
-        // 渲染采集按钮
         if(gatherArea.style.display !== 'none') {
             gatherArea.innerHTML = '';
             zConf.resources.forEach(r => {
@@ -102,7 +100,6 @@ function render(data) {
             });
         }
         
-        // --- 修复点 1：地图渲染使用 z.info.name ---
         zoneCont.innerHTML = '';
         for(const [k, z] of Object.entries(ZONE_CONFIG)) {
             zoneCont.innerHTML += `<button class="travel-btn" onclick="travel('${k}')"><b>${z.info.name}</b><br><small style="color:#90a4ae">${z.res_str}</small></button>`;
@@ -147,7 +144,7 @@ function render(data) {
 
     // --- 6. 标签页内容 ---
     
-    // Tab 1: 进化 (--- 修复点 2：恢复可见的 需/益 详情卡片 ---)
+    // Tab 1: 进化
     const craftGrid = document.getElementById('craft-grid');
     craftGrid.innerHTML = '';
     for(const [k, r] of Object.entries(recipes)) {
@@ -164,21 +161,26 @@ function render(data) {
                 <div style="font-weight:bold; color:#81c784; font-size:13px;">${r.name} <span style="font-size:10px; color:#aaa;">Lv.${r.current_level}</span></div>
                 <div style="color:#aaa; font-size:11px; margin:5px 0;">${r.desc}</div>
             </div>
-            <div style="background:#111; padding:5px; border-radius:4px; margin-bottom:5px; font-size:11px; color:#bdbdbd;">
-                <div>需: ${costStr}</div>
-                <div style="color:#66bb6a; margin-top:2px;">益: ${statStr}</div>
+            <div>
+                <div style="background:#111; padding:5px; border-radius:4px; margin-bottom:5px; font-size:11px; color:#bdbdbd;">
+                    <div>需: ${costStr}</div>
+                    <div style="color:#66bb6a; margin-top:2px;">益: ${statStr}</div>
+                </div>
+                <button class="craft-btn" onclick="craft('${k}')">进化</button>
             </div>
-            <button class="craft-btn" onclick="craft('${k}')">进化</button>
          </div>`;
     }
 
-    // Tab 2: 自动化 (--- 修复点 3：现在能正确显示产出了 ---)
+    // Tab 2: 自动化 (这里做了修改，显示需求)
     const autoList = document.getElementById('auto-list');
     autoList.innerHTML = '';
     for(const [k, info] of Object.entries(autoInfo)) {
-        let costStr = '';
-        for(const [r,v] of Object.entries(info.next_cost)) costStr += `${TRANS[r]}:${v} `;
-        
+        // 构建可见的成本字符串
+        let displayCostStr = '';
+        for(const [r,v] of Object.entries(info.next_cost)) {
+            displayCostStr += `${TRANS[r] || r}: ${v}  `;
+        }
+
         let detail = `产: ${info.produce_str} | 耗: ${info.consume_str}`;
         
         autoList.innerHTML += `
@@ -186,8 +188,9 @@ function render(data) {
             <div style="flex:1;">
                 <div style="font-size:12px; font-weight:bold; color:#ffb74d;">${info.name} <span style="font-size:10px; color:#666;">Lv.${info.level}</span></div>
                 <div style="font-size:10px; color:#aaa;">${detail}</div>
+                <div style="font-size:10px; color:#ffcc80; margin-top:2px;">需: ${displayCostStr}</div>
             </div>
-            <button class="auto-btn" onclick="buyAuto('${k}')" data-tooltip="花费:\n${costStr}">升级</button>
+            <button class="auto-btn" onclick="buyAuto('${k}')">升级</button>
         </div>`;
     }
 
