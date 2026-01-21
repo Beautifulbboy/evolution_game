@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
+    <title>进化 v4.1 (重构版)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="col-left">
+        <div class="panel">
+            <h3>🧬 核心机体</h3>
+            <div class="bar-box">
+                <div id="hp-bar" class="bar-fill" style="background:#d32f2f;"></div>
+                <div id="hp-text" class="bar-text">100 / 100</div>
+            </div>
+            <div class="bar-box" style="margin-top:2px;">
+                <div id="dna-bar" class="bar-fill dna-bar"></div>
+                <div id="dna-text" class="bar-text">DNA不稳定: 0%</div>
+            </div>
+            
+            <div style="font-size: 12px; color: #aaa; display:flex; justify-content:space-between; margin-top:8px;">
+                <span>🛡️ 防御: <b id="s-def" style="color:#fff">0</b></span>
+                <span>🔥 耐热: <b id="s-heat" style="color:#fff">0</b></span>
+            </div>
+            <div style="font-size: 12px; color: #aaa; display:flex; justify-content:space-between; margin-top:4px;">
+                <span>⚔️ 攻/采: <b id="s-spd" style="color:#fff">1.0</b></span>
+                <span>💖 回复: <b id="s-reg" style="color:#fff">0</b>/s</span>
+            </div>
+            
+            <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+            <div id="buff-area" style="min-height:20px;"></div>
+        </div>
+
+        <div class="panel" style="flex: 1; overflow-y:auto;">
+            <h3>📦 物质仓库 <span id="cap-display" style="float:right; font-size:12px; color:#aaa">Cap: 100</span></h3>
+            <div id="resources-container"></div>
+        </div>
+        
+        <div class="panel">
+            <h3>🌏 区域跃迁</h3>
+            {% for key, item in zones.items() %}
+            <button class="travel-btn" onclick="travel('{{key}}')">
+                <div style="font-weight:bold; font-size:13px;">{{ item.info.name }}</div>
+                <small style="color:#90a4ae;" id="zone-desc-{{key}}">{{ item.res_str }}</small>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-mid">
+        <div class="panel" id="current-env">
+            <h2 id="env-title" style="border:none; margin:0; font-size: 22px;">...</h2>
+            <p id="env-desc" style="font-size: 13px; opacity: 0.9; margin: 5px 0 20px 0;">...</p>
+            
+            <div id="gather-area" style="display:block;"></div>
+            
+            <div id="combat-area" style="display:none;">
+                <button class="combat-btn" style="background:#5e35b1; margin-top:20px;" onclick="startBattle()">⚠️ 挑战霸主 ⚠️</button>
+                <p style="font-size:12px; color:#aaa; margin-top:10px;">(击败后可解锁本区域采集与容量奖励)</p>
+            </div>
+        </div>
+
+        <div class="panel combat-mode" id="combat-interface" style="flex:1; display:none; flex-direction:column; justify-content:center; text-align:center;">
+            <h2 style="color:#ff5252; font-size:24px;">VS 噬菌体霸主</h2>
+            <div class="boss-hp-bar">
+                <div id="boss-bar" class="boss-fill"></div>
+                <div id="boss-text" class="bar-text" style="font-size:14px;"></div>
+            </div>
+            <div style="margin-bottom:20px; font-size:13px; color:#aaa;">Boss正在对你造成持续物理伤害...</div>
+            
+            <button class="combat-btn btn-atk" onclick="combatAction('attack')">⚔️ 攻击 (dmg: <span id="atk-dmg">0</span>)</button>
+            <button class="combat-btn btn-esc" onclick="combatAction('escape')">💨 逃离</button>
+        </div>
+
+        <div class="panel" id="evolution-interface" style="flex: 1; display:flex; flex-direction:column;">
+            <h3>⚗️ 进化序列</h3>
+            <div id="craft-grid" class="craft-grid"></div>
+        </div>
+    </div>
+
+    <div class="col-right">
+        <div class="panel" style="flex:1; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+            <div style="padding: 8px; background: #000; border-bottom: 1px solid #333; font-weight: bold; color: #888; font-size: 12px;">🖥️ 终端日志</div>
+            <div id="game-log" class="log-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 这种写法虽然稍微繁琐一点，但编辑器通常不会报错
+        const TRANS = JSON.parse('{{ trans | tojson | safe }}');
+        const ZONE_CONFIG = JSON.parse('{{ zones | tojson | safe }}');
+        const BOSS_CONFIG = JSON.parse('{{ config.boss | tojson | safe }}');
+    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

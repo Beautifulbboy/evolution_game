@@ -1,0 +1,46 @@
+body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #ddd; margin: 0; padding: 15px; height: 95vh; display: flex; gap: 15px; box-sizing: border-box; overflow: hidden; }
+::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+.col-left { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 15px; }
+.col-mid  { flex: 2; min-width: 400px; display: flex; flex-direction: column; gap: 15px; }
+.col-right{ flex: 1; min-width: 240px; display: flex; flex-direction: column; }
+.panel { background: #1e1e1e; border-radius: 8px; padding: 15px; border: 1px solid #333; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+h3 { margin: 0 0 10px 0; color: #eee; border-bottom: 1px solid #444; padding-bottom: 5px; font-size: 15px; }
+
+.bar-box { background: #000; height: 18px; border-radius: 4px; position: relative; border: 1px solid #555; overflow: hidden; margin-bottom: 5px;}
+.bar-fill { height: 100%; width: 0%; transition: width 0.3s; }
+.bar-text { position: absolute; width: 100%; text-align: center; top: 0; line-height: 18px; font-size: 11px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px #000; pointer-events: none;}
+.dna-bar { background: repeating-linear-gradient(45deg, #7b1fa2, #7b1fa2 10px, #4a148c 10px, #4a148c 20px); }
+
+.buff-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; margin-bottom: 5px; color: #000; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.5); cursor: help; position: relative; }
+.buff-tag::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #222; color: #fff; border: 1px solid #555; padding: 6px 10px; border-radius: 4px; font-size: 12px; white-space: pre; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); pointer-events: none; opacity: 0; visibility: hidden; transition: 0.2s; min-width: 100px; text-align: center;}
+.buff-tag:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-5px); }
+
+button { cursor: pointer; border: none; border-radius: 4px; transition: 0.2s; font-family: inherit;}
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.travel-btn { width: 100%; background: #263238; color: #eceff1; border: 1px solid #37474f; padding: 10px; margin-bottom: 5px; text-align: left;}
+.travel-btn:hover { background: #37474f; }
+.gather-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 16px; padding: 12px 24px; margin: 8px; border-radius: 30px; }
+.gather-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+
+.combat-mode { border: 2px solid #b71c1c; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 10px #b71c1c; } 50% { box-shadow: 0 0 20px #f44336; } 100% { box-shadow: 0 0 10px #b71c1c; } }
+
+.boss-hp-bar { height: 30px; background: #333; margin: 20px 0; border: 1px solid #fff; position: relative; border-radius: 4px; overflow: hidden; }
+.boss-fill { height: 100%; background: #d50000; width: 100%; transition: width 0.2s; }
+.combat-btn { width: 100%; padding: 15px; font-size: 18px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid #444; color: white;}
+.btn-atk { background: #c62828; } .btn-atk:hover { background: #e53935; } 
+.btn-esc { background: #455a64; } .btn-esc:hover { background: #607d8b; }
+
+.res-rare { color: #e040fb !important; font-weight: bold; }
+
+#current-env { padding: 20px; border-radius: 6px; text-align: center; color: #fff; transition: background 0.5s; min-height: 140px; display: flex; flex-direction: column; justify-content: center;}
+.craft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; overflow-y: auto; padding-right: 5px;}
+.craft-card { background: #2a2a2a; padding: 10px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; justify-content: space-between; min-height: 130px;}
+.craft-card:hover { border-color: #666; background: #323232; }
+.craft-btn { width: 100%; background: #2e7d32; color: white; padding: 6px; font-weight:bold;}
+
+.log-content { flex: 1; overflow-y: auto; padding: 10px; font-family: 'Consolas', monospace; font-size: 12px; color: #888; display: flex; flex-direction: column; gap: 4px;}
+.log-line { line-height: 1.4; border-bottom: 1px dashed #2a2a2a; padding-bottom: 3px; }
+.log-mut { color: #e040fb; font-weight: bold; }
+.log-combat { color: #ff5252; }
